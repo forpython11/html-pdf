@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${resume.userName} + '的个人简历'">个人简历</title>
+    <style>
+        /* ===== 字号 / 字重 ===== */
+        .fs-8 {
+            font-size: 8px;
+        }
+
+        .fs-10 {
+            font-size: 10px;
+        }
+
+        .fs-12 {
+            font-size: 12px;
+        }
+
+        .fw-400 {
+            font-weight: 400;
+        }
+
+        .fw-500 {
+            font-weight: 500;
+        }
+
+        /* ===== 间距 ===== */
+        .mb-10 {
+            margin-bottom: 10px;
+        }
+
+        .ml-4 {
+            margin-left: 4px;
+        }
+
+        .mr-10 {
+            margin-right: 10px;
+        }
+
+        .mr-24 {
+            margin-right: 24px;
+        }
+
+        .fl-left {
+            float: left;
+        }
+
+        .fl-right {
+            float: right;
+        }
+
+        @font-face {
+            font-family: "PingFang SC";
+            src: url("fonts/PingFangSC-Regular.otf") format("opentype");
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: "PingFang SC";
+            src: url("fonts/PingFangSC-Medium.otf") format("opentype");
+            font-weight: normal;
+            font-style: normal;
+        }
+
+
+        /* ===== Reset ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            color: #333;
+            max-width: 594px;
+            font-family: 'PingFang SC';
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        /* ===== Header ===== */
+        .resume-header {
+            position: relative;
+            display: flex;
+            align-items: center;
+            height: 152px;
+            background-color: #f5f5f5;
+            margin-bottom: 20px;
+        }
+
+        .irregular-shape {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 9;
+        }
+
+        .avatar-box {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: cover;
+            flex-shrink: 0;
+            margin: 20px;
+        }
+
+        .right-content {
+            width: 100%;
+        }
+
+        .name-box {
+            font-size: 26px;
+            font-weight: 400;
+            color: #000;
+            line-height: normal;
+        }
+
+        .name-box .intension {
+            font-size: 10px;
+            color: #666;
+            margin-top: 6px;
+            margin-bottom: 16px;
+            line-height: 1;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .user-info-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info-icon {
+            width: 16px;
+        }
+
+        .user-info-item .label {
+            margin-left: 4px;
+            color: #252525;
+        }
+
+        /* ===== Section ===== */
+        .section {
+            margin: 0 20px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            height: 23px;
+            margin-bottom: 18px;
+            background-color: rgba(38, 38, 38, 0.08);
+            font-size: 10px;
+            color: #fff;
+        }
+
+        .bg-dark {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 170px;
+            height: 23px;
+            padding-left: 23px;
+            background-color: #262626;
+            border-right: 8px solid #a2a2a2;
+        }
+
+        .bg-gold {
+            position: absolute;
+            left: 10px;
+            width: 7px;
+            height: 23px;
+            background-color: #c6b292;
+        }
+
+        .session-content {
+            margin-bottom: 24px;
+            color: #303641;
+        }
+
+        /* ===== 中文排版 & PDF 防标点换行 ===== */
+        .content-text {
+            /* 核心：允许中文断行，但不拆英文 */
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            /* 禁止标点跑到下一行开头 */
+            line-break: loose;
+
+            /* 防止奇怪间距 */
+            word-spacing: 0;
+            white-space: pre-line;
+        }
+
+
+        /* ===== Experience ===== */
+        .experience-list {
+            list-style: none;
+        }
+
+        .experience-item {
+            margin-bottom: 24px;
+        }
+
+        .experience-header {
+            overflow: hidden;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        @media print {
+            body {
+                width: 595px;
+                margin: 0;
+            }
+
+            .resume-header {
+                page-break-after: avoid;
+            }
+
+            .section-title {
+                page-break-after: avoid;
+            }
+
+            .section {
+                page-break-inside: auto;
+            }
+
+            .experience-item {
+                page-break-inside: avoid;
+            }
+
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 简历头部：修复空值判断 -->
+    <div class="resume-header">
+        <div class="avatar-box" th:if="${avatarUrl != null and avatarUrl != ''}"
+            th:style="'background-image:url(' + ${avatarUrl} + ')'">
+        </div>
+        <!-- <div class="irregular-shape">
+            <svg xmlns="http://www.w3.org/2000/svg" width="129" height="87" viewBox="0 0 129 87" fill="none">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M0 0H129L0 87V0Z" fill="#262626" />
+            </svg>
+        </div> -->
+        <div class="right-content">
+            <div class="name-box">
+                <div th:text="${resume.userName != null ? resume.userName : '未填写姓名'}">张三</div>
+                <div class="intension">求职意向:</div>
+            </div>
+            <div class="user-info mb-10">
+                <div class="user-info-item mr-10">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <mask id="mask0_14831_18096" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0"
+                            width="16" height="16">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M0 0H15.9838V15.9838H0V0Z" fill="white" />
+                        </mask>
+                        <g mask="url(#mask0_14831_18096)">
+                            <path
+                                d="M7.99219 0C12.4211 0.000143018 15.9834 3.55238 15.9834 7.96973C15.9832 12.387 12.421 15.9833 7.99219 15.9834C3.56268 15.9834 0.000154068 12.3871 0 7.96973C0 3.55229 3.56259 0 7.99219 0ZM4.20117 3.20996C3.76759 3.59675 2.60293 5.82842 5.52539 9.76758C8.10571 13.4104 10.1844 13.0008 11.0293 12.75L11.9199 12.0664L11.9648 11.6807L10.3213 9.47168L9.97852 9.42676L9.11133 10.041C8.6987 10.2761 8.40386 10.022 7.87891 9.56934C7.79377 9.49592 7.70226 9.41758 7.60352 9.33496C7.1928 8.97062 6.57591 8.0146 6.30176 7.53613C6.25329 7.40241 6.20548 7.27846 6.16113 7.16406C5.93379 6.57759 5.79896 6.22804 6.14258 5.94238L7.05566 5.30469L7.10156 4.94043L5.52539 2.66406L5.1377 2.5498L4.20117 3.20996Z"
+                                fill="black" />
+                        </g>
+                    </svg>
+                    <span class="label fs-12">电话：</span>
+                    <span class="fs-12" th:text="${resume.tele != null ? resume.tele : '未填写电话'}">13800138000</span>
+                </div>
+                <div class="user-info-item mr-10">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M16 8C16 12.4183 12.4183 16 8 16C3.58172 16 0 12.4183 0 8C0 3.58172 3.58172 0 8 0C12.4183 0 16 3.58172 16 8Z"
+                            fill="black" />
+                        <path
+                            d="M11.2875 9.3555C11.4061 9.35395 11.5194 9.30614 11.6033 9.22227C11.6871 9.1384 11.7349 9.0251 11.7365 8.9065C11.7367 8.84748 11.7252 8.78901 11.7027 8.73444C11.6802 8.67988 11.6472 8.6303 11.6054 8.58857C11.5637 8.54683 11.5141 8.51377 11.4596 8.49127C11.405 8.46878 11.3465 8.4573 11.2875 8.4575C11.2285 8.45724 11.17 8.46867 11.1154 8.49114C11.0608 8.51361 11.0112 8.54667 10.9694 8.58842C10.9277 8.63017 10.8946 8.67977 10.8721 8.73436C10.8497 8.78896 10.8382 8.84746 10.8385 8.9065C10.8385 9.1565 11.0385 9.3555 11.2875 9.3555ZM9.075 9.3555C9.1936 9.35395 9.3069 9.30614 9.39077 9.22227C9.47464 9.1384 9.52245 9.0251 9.524 8.9065C9.524 8.6575 9.324 8.4575 9.075 8.4575C9.01596 8.45724 8.95746 8.46867 8.90286 8.49114C8.84827 8.51361 8.79867 8.54667 8.75692 8.58842C8.71517 8.63017 8.68211 8.67977 8.65964 8.73436C8.63717 8.78896 8.62574 8.84746 8.626 8.9065C8.626 9.1565 8.8255 9.3555 9.075 9.3555ZM12.3585 11.8755C12.3266 11.8935 12.3012 11.921 12.2858 11.9542C12.2703 11.9874 12.2657 12.0245 12.2725 12.0605C12.2725 12.0845 12.2725 12.1095 12.285 12.134C12.334 12.3425 12.432 12.6745 12.432 12.687C12.432 12.7235 12.4445 12.748 12.4445 12.773C12.4445 12.7875 12.4416 12.8018 12.4361 12.8152C12.4305 12.8286 12.4224 12.8407 12.4121 12.851C12.4018 12.8612 12.3897 12.8693 12.3762 12.8748C12.3628 12.8803 12.3485 12.8831 12.334 12.883C12.309 12.883 12.297 12.871 12.2725 12.859L11.548 12.441C11.4951 12.4119 11.4363 12.3951 11.376 12.392C11.3395 12.392 11.3025 12.392 11.278 12.404C10.934 12.5025 10.578 12.5515 10.1975 12.5515C8.3675 12.5515 6.894 11.323 6.894 9.799C6.894 8.275 8.3675 7.0465 10.1975 7.0465C12.027 7.0465 13.5005 8.2755 13.5005 9.799C13.5005 10.6225 13.0585 11.372 12.3585 11.876M10.337 6.5495C10.2903 6.54794 10.2437 6.54711 10.197 6.547C8.11 6.547 6.394 7.977 6.394 9.7995C6.394 10.0765 6.434 10.3445 6.508 10.5995H6.4635C6.02664 10.5949 5.59228 10.533 5.1715 10.4155C5.1345 10.403 5.0975 10.403 5.0605 10.403C4.98643 10.4044 4.91409 10.4257 4.851 10.4645L3.9775 10.967C3.95503 10.9808 3.92974 10.9893 3.9035 10.992C3.86782 10.9916 3.83371 10.9773 3.80847 10.952C3.78324 10.9268 3.76889 10.8927 3.7685 10.857C3.7685 10.82 3.7805 10.7955 3.793 10.7585C3.805 10.7465 3.916 10.3415 3.9775 10.0965C3.9775 10.0715 3.9895 10.035 3.9895 10.0105C3.98914 9.96775 3.97899 9.92565 3.95984 9.88743C3.94068 9.84921 3.91303 9.81588 3.879 9.79C3.0295 9.188 2.5 8.293 2.5 7.2995C2.5005 5.472 4.2855 4 6.4755 4C8.358 4 9.9405 5.0845 10.337 6.549M7.76 6.758C8.0465 6.758 8.273 6.5195 8.273 6.245C8.273 5.9585 8.0465 5.732 7.76 5.732C7.4735 5.732 7.247 5.9585 7.247 6.245C7.247 6.5315 7.4735 6.758 7.76 6.758ZM5.13 6.758C5.4165 6.758 5.6435 6.5195 5.6435 6.245C5.6435 5.9585 5.4165 5.732 5.13 5.732C4.844 5.732 4.617 5.9585 4.617 6.245C4.617 6.5315 4.844 6.758 5.13 6.758Z"
+                            fill="white" />
+                    </svg>
+                    <span class="label fs-12">微信号：</span>
+                    <span class="fs-12" th:text="${resume.email != null ? resume.email : '未填写邮箱'}">zhangsan</span>
+                </div>
+                <div class="user-info-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M0 8C0 3.58172 3.58172 0 8 0C12.4183 0 16 3.58172 16 8C16 12.4183 12.4183 16 8 16C3.58172 16 0 12.4183 0 8Z"
+                            fill="black" />
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M10.9302 8.84326L8.01301 13.4852L5.31601 8.84326L5.16292 8.63453C4.73473 8.04344 4.48792 7.31581 4.48792 6.52581C4.48792 4.51944 6.11582 2.89062 8.1231 2.89062C10.1278 2.89062 11.7582 4.51944 11.7582 6.52581C11.7582 7.31581 11.5114 8.04344 11.0843 8.63453L10.9302 8.84326Z"
+                            fill="white" />
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M9.8241 6.3125C9.8241 7.14093 9.15252 7.8125 8.3241 7.8125C7.49567 7.8125 6.8241 7.14093 6.8241 6.3125C6.8241 5.48407 7.49567 4.8125 8.3241 4.8125C9.15252 4.8125 9.8241 5.48407 9.8241 6.3125Z"
+                            fill="black" />
+                    </svg>
+                    <span class="label fs-12">城市：</span>
+                    <span class="fs-12" th:if="${resume.base == null || resume.base.isEmpty()}">未填写</span>
+                    <span class="fs-12" th:each="item : ${resume.base}" th:text="${item}"
+                        style="margin-right: 8px;"></span>
+                </div>
+            </div>
+            <div class="user-info">
+                <div class="user-info-item mr-10">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M16 8C16 12.4183 12.4183 16 8 16C3.58172 16 0 12.4183 0 8C0 3.58172 3.58172 0 8 0C12.4183 0 16 3.58172 16 8Z"
+                            fill="black" />
+                        <path
+                            d="M11.0508 7.83306V10.3652C11.0508 11.2104 10.3598 11.8954 9.50764 11.8954H6.4949C6.08739 11.897 5.69591 11.7367 5.40653 11.4497C5.11715 11.1628 4.95357 10.7727 4.95173 10.3652V7.85038L7.71853 9.07574C7.79888 9.11143 7.88572 9.13016 7.97363 9.13075C8.06154 9.13135 8.14864 9.1138 8.22946 9.0792L8.23552 9.07661L11.0508 7.83306ZM12.1766 9.19351C12.3671 9.19351 12.5204 9.34592 12.5204 9.53471C12.5201 9.57963 12.5111 9.62406 12.4937 9.66548C12.4763 9.70689 12.4509 9.74447 12.419 9.77607C12.387 9.80768 12.3492 9.83268 12.3076 9.84966C12.266 9.86664 12.2215 9.87526 12.1766 9.87504C12.1317 9.87526 12.0871 9.86664 12.0455 9.84966C12.004 9.83268 11.9661 9.80768 11.9342 9.77607C11.9023 9.74447 11.8769 9.70689 11.8595 9.66548C11.8421 9.62406 11.833 9.57963 11.8328 9.53471C11.8328 9.34592 11.9869 9.19351 12.1766 9.19351ZM8.04587 4.10157H8.05366C8.14777 4.10301 8.24059 4.12364 8.32645 4.16219L13.0997 6.29249C13.128 6.30437 13.1522 6.32435 13.1692 6.34992C13.1862 6.3755 13.1953 6.40553 13.1953 6.43624C13.1953 6.46696 13.1862 6.49699 13.1692 6.52256C13.1522 6.54814 13.128 6.56812 13.0997 6.57999L12.4675 6.85884V8.64535C12.4675 8.80382 12.3377 8.93285 12.1766 8.93285C12.1386 8.93308 12.1009 8.92583 12.0658 8.9115C12.0306 8.89718 11.9986 8.87606 11.9715 8.84936C11.9445 8.82267 11.923 8.79091 11.9083 8.7559C11.8935 8.7209 11.8858 8.68333 11.8856 8.64535V7.11517L8.24591 8.72415C8.16669 8.75886 8.08126 8.77712 7.99478 8.77784H7.98785C7.89868 8.77795 7.81047 8.75936 7.72892 8.72329L2.89504 6.58173C2.86675 6.56977 2.84262 6.54971 2.82569 6.52409C2.80876 6.49846 2.79977 6.4684 2.79987 6.43769C2.79996 6.40697 2.80912 6.37697 2.82621 6.35144C2.8433 6.32592 2.86754 6.30601 2.89591 6.29422L7.76616 4.15959C7.85462 4.12091 7.95019 4.10115 8.04674 4.10157H8.04587Z"
+                            fill="white" />
+                    </svg>
+                    <span class="label fs-12">毕业时间：</span>
+                    <span class="fs-12"></span>
+                </div>
+                <div class="user-info-item mr-10">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M16 8C16 12.4183 12.4183 16 8 16C3.58172 16 0 12.4183 0 8C0 3.58172 3.58172 0 8 0C12.4183 0 16 3.58172 16 8Z"
+                            fill="black" />
+                        <path
+                            d="M8 3.04395C5.26311 3.04395 3.04395 5.26311 3.04395 8C3.04395 10.7369 5.26311 12.9561 8 12.9561C10.7369 12.9561 12.9561 10.7369 12.9561 8C12.9561 5.26311 10.7369 3.04395 8 3.04395ZM9.84303 5.7742L8.61398 8.03982H9.29986C9.34853 8.03982 9.38836 8.07965 9.38836 8.12833V8.4591C9.38836 8.50777 9.34853 8.5476 9.29986 8.5476H8.39272V9.0067H9.29986C9.34853 9.0067 9.38836 9.04652 9.38836 9.0952V9.42597C9.38836 9.47465 9.34853 9.51447 9.29986 9.51447H8.39272V10.2678C8.39272 10.3165 8.3529 10.3563 8.30422 10.3563H7.70352C7.65485 10.3563 7.61502 10.3165 7.61502 10.2678V9.51447H6.7112C6.66253 9.51447 6.6227 9.47465 6.6227 9.42597V9.0952C6.6227 9.04652 6.66253 9.0067 6.7112 9.0067H7.61502V8.5476H6.7112C6.66253 8.5476 6.6227 8.50777 6.6227 8.4591V8.12833C6.6227 8.07965 6.66253 8.03982 6.7112 8.03982H7.39045L6.15697 5.7742C6.14968 5.76069 6.146 5.74552 6.14628 5.73017C6.14657 5.71481 6.15081 5.69979 6.15859 5.68656C6.16638 5.67332 6.17745 5.66232 6.19073 5.65461C6.20401 5.6469 6.21905 5.64275 6.23441 5.64256H6.90591C6.93909 5.64256 6.97007 5.66136 6.98445 5.69123L7.98672 7.6825H8.02434L9.02661 5.69123C9.03395 5.67667 9.04517 5.66442 9.05903 5.65583C9.07289 5.64724 9.08885 5.64265 9.10516 5.64256H9.76338C9.81206 5.64256 9.85188 5.68238 9.85188 5.73106C9.8541 5.74654 9.84967 5.76093 9.84303 5.7742Z"
+                            fill="white" />
+                    </svg>
+                    <span class="label fs-12">期望薪资：</span>
+                    <span class="fs-12"
+                        th:text="${resume.brief.salary != null ? resume.brief.salary : (resume.salary != null ? resume.salary : '未填写期望薪资')}">15k-20k</span>
+                </div>
+                <div class="user-info-item">
+                    <img class="user-info-icon"
+                        src="https://wise-match.oss-cn-hangzhou.aliyuncs.com/web_app/resume/email-icon.png" alt="">
+                    <span class="label fs-12">邮箱：</span>
+                    <span class="fs-12"
+                        th:text="${resume.email != null ? resume.email : '未填写邮箱'}">zhangsan@example.com</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 掌握技能：修复brief空值判断 -->
+    <div class="section" th:if="${resume.brief != null}">
+        <div class="section-title">
+            <div class="bg-dark">
+                <div class="bg-gold"></div>
+                <span>掌握技能</span>
+                <span class="ml-4 fs-8">Master Skills</span>
+            </div>
+        </div>
+        <div class="session-content">
+            <span class="fs-12 fw-400 content-text"
+                th:text="${resume.brief.skills != null ? resume.brief.skills : (resume.skills != null ? resume.skills : '未填写核心技能')}">Java、Spring、Boot、MySQL</span>
+        </div>
+    </div>
+
+    <!-- 个人优势：修复集合判断 -->
+    <div class="section" th:if="${resume.languageSkills != null and !resume.languageSkills.isEmpty()}">
+        <div class="section-title">
+            <div class="bg-dark">
+                <div class="bg-gold"></div>
+                <span>个人优势</span>
+                <span class="ml-4 fs-8">Personal Advantage</span>
+            </div>
+        </div>
+        <div class="session-content">
+            <span class="fs-12 fw-400 content-text"
+                th:text="${resume.brief.comments}">我具备较强的学习能力和适应能力，能够快速掌握新知识并灵活应用于实际工作中。
+                在团队合作中，我注重沟通与协作，善于倾听他人意见，积极营造高效、和谐的工作氛围。同时，我具备良好的时间管理和任务执行能力，能够在多任务并行的情况下保持高效率与高质量。面对挑战，我始终保持积极主动的态度，勇于承担责任，善于从问题中总结经验，不断优化工作方式。此外，我注重细节，做事认真负责，追求精益求精，始终以高标准要求自己。这些优势使我能够在不同环境中持续成长，为团队和公司创造更大价值。</span>
+        </div>
+    </div>
+    <!-- 工作经历：修复集合判断 -->
+    <div class="section" th:if="${not #lists.isEmpty(resume.workExperience)}">
+        <div class="section-title">
+            <div class="bg-dark">
+                <div class="bg-gold"></div>
+                <span>工作经历</span>
+                <span class="ml-4 fs-8">Work Experience</span>
+            </div>
+        </div>
+        <ul class="experience-list">
+            <li class="experience-item" th:each="work : ${resume.workExperience}">
+                <div class="experience-header">
+                    <div class="fl-left fs-12 fw-500">
+                        <span th:text="${work.name != null ? work.name : '未填写公司/机构名称'}">XX科技有限公司</span>
+                        <span class="ml-4" th:text="${work.label != null ? work.label : '未填写职位'}">后端开发工程师</span>
+                    </div>
+                    <span class="fl-right fs-12 fw-400 fl-right"
+                        th:text="${work.startDate + ' -- ' + (work.endDate ?: '至今')}">
+                        2024.10~至今</span>
+                </div>
+                <div class="fs-12 fw-400 content-text" th:text="${work.content != null ? work.content : '未填写工作内容'}">
+                    负责XX项目后端开发，基于Spring Boot框架搭建接口...
+                </div>
+            </li>
+        </ul>
+    </div>
+    <!-- 项目经历：修复集合判断 -->
+    <div class="section" th:if="${not #lists.isEmpty(resume.projectExperience)}">
+        <div class="section-title">
+            <div class="bg-dark">
+                <div class="bg-gold"></div>
+                <span>项目经历</span>
+                <span class="ml-4 fs-8">Project Experience</span>
+            </div>
+        </div>
+        <ul class="experience-list">
+            <li class="experience-item" th:each="project : ${resume.projectExperience}">
+                <div class="experience-header">
+                    <div class="fl-left fs-12 fw-500">
+                        <span th:text="${project.name != null ? project.name : '未填写项目名称'}">XX管理系统</span>
+                        <span class="ml-4" th:text="${project.label != null ? project.label : '项目描述'}">核心项目</span>
+                    </div>
+                    <span class="fl-right fs-12 fw-400"
+                        th:text="${project.startDate + ' -- ' + (project.endDate != null ? project.endDate : '至今')}">2021
+                        ~ 2022</span>
+                </div>
+                <div class="fs-12 fw-400 content-text"
+                    th:text="${project.content != null ? project.content : '未填写项目内容'}">
+                    项目职责：负责用户模块和权限模块的开发，使用MySQL+Redis优化查询性能...
+                </div>
+            </li>
+        </ul>
+    </div>
+    <!-- 教育经历：修复核心报错的表达式 -->
+    <div class="section" th:if="${not #lists.isEmpty(resume.eduExperience)}">
+        <div class="section-title">
+            <div class="bg-dark">
+                <div class="bg-gold"></div>
+                <span>教育经历</span>
+                <span class="ml-4 fs-8">Education Experience</span>
+            </div>
+        </div>
+        <ul class="experience-list">
+            <li class="experience-item" th:each="edu : ${resume.eduExperience}">
+                <div class="experience-header">
+                    <div class="fl-left fs-12 fw-400">
+                        <span th:text="${edu.name != null ? edu.name : '未填写学校名称'}">XX大学</span>/
+                        <span th:text="${edu.label != null ? edu.label : '统招全日制'}">统招全日制</span>/
+                        <span th:text="${edu.degree != null ? edu.degree : ''}">本科</span>
+                    </div>
+                    <span class="fl-right fs-12 fw-400"
+                        th:text="${edu.startDate + ' -- ' + (edu.endDate != null ? edu.endDate : '至今')}">2021
+                        ~ 2022</span>
+                </div>
+                <div class="fs-12 fw-400 content-text" th:text="${edu.content}">主修课程：数据结构、操作系统....
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 在校经历：修复集合判断 -->
+    <div class="section" th:if="${not #lists.isEmpty(resume.schoolExperience)}">
+        <div class="section-title">
+            <div class="bg-dark">
+                <div class="bg-gold"></div>
+                <span>在校经历</span>
+                <span class="ml-4 fs-8">School Experience</span>
+            </div>
+        </div>
+        <ul class="experience-list">
+            <li class="experience-item" th:each="school : ${resume.schoolExperience}">
+                <div class="experience-header">
+                    <div class="fl-left fs-12 fw-500">
+                        <span th:text="${school.name != null ? school.name : '未填写项目名称'}">XX管理系统</span>
+                        <span th:text="${school.label != null ? school.label : '项目描述'}">核心项目</span>
+                    </div>
+                    <span class="fl-right fs-12 fw-400"
+                        th:text="${school.startDate + ' -- ' + (school.endDate != null ? school.endDate : '至今')}">2021
+                        ~ 2022</span>
+                </div>
+                <div class=" fs-12 fw-400 content-text"
+                    th:text="${school.content != null ? school.content : '未填写项目内容'}">
+                    组织校级文艺晚会，协调各部门资源，参与人数超500人...
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 额外信息：修复空值判断 -->
+    <div class="section" th:if="${resume.extraInfo != null}">
+        <div class="section-title">
+            <div class="bg-dark">
+                <div class="bg-gold"></div>
+                <span>附加信息</span>
+                <span class="ml-4 fs-8">Additional Information</span>
+            </div>
+        </div>
+        <div class="session-content">
+            <span class="fs-12 fw-400 content-text" th:text="${resume.extraInfo}">持有软件设计师证书，具备独立开发能力...</span>
+        </div>
+    </div>
+
+    <!-- MBTI -->
+    <!-- <div class="section">
+        <div class="section-title">
+            <div class="bg-dark">
+                <div class="bg-gold"></div>
+                <span>MBTI</span>
+            </div>
+        </div>
+    </div> -->
+</body>
+
+</html>
