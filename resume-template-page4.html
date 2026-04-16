@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title
+        th:text="${resume.brief != null and resume.brief.userName != null ? resume.brief.userName + '的个人简历' : '个人简历'}">
+        个人简历</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        @font-face {
+            font-family: "Alibaba PuHuiTi";
+            src: url("AlibabaPuHuiTi-Regular.otf");
+            font-weight: 400;
+        }
+
+        @font-face {
+            font-family: "Alibaba PuHuiTi";
+            src: url("AlibabaPuHuiTi-Bold.otf");
+            font-weight: 700;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Alibaba PuHuiTi", "PingFang SC", sans-serif;
+            color: #2f2d38;
+            background: #ffffff;
+        }
+
+        .resume-page {
+            width: 595px;
+            min-height: 842px;
+            margin: 0 auto;
+            background: #ffffff;
+        }
+
+        .header {
+            padding: 24px 30px 20px;
+            background: #3f3b4f;
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        .avatar-wrap {
+            float: left;
+            width: 96px;
+            height: 96px;
+            border: 4px solid rgba(255, 255, 255, 0.18);
+            border-radius: 48px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .avatar {
+            width: 88px;
+            height: 88px;
+            margin: 0 auto;
+            margin-top: 0;
+            background-color: #e9e6f2;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: cover;
+            text-align: center;
+            line-height: 88px;
+            font-size: 12px;
+            color: #6f6a83;
+            border-radius: 44px;
+        }
+
+        .header-info {
+            float: left;
+            width: 276px;
+            margin-left: 18px;
+            padding-top: 8px;
+        }
+
+        .header-name {
+            float: right;
+            width: 140px;
+            text-align: right;
+            padding-top: 14px;
+        }
+
+        .name {
+            font-size: 26px;
+            line-height: 1.2;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .minor {
+            margin-top: 6px;
+            font-size: 12px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.88);
+        }
+
+        .info-line {
+            font-size: 12px;
+            line-height: 1.9;
+            color: rgba(255, 255, 255, 0.94);
+            white-space: nowrap;
+        }
+
+        .info-half {
+            display: inline-block;
+            vertical-align: top;
+            width: 169px;
+        }
+
+        .content {
+            padding: 18px 34px 26px;
+        }
+
+        .section {
+            margin-bottom: 16px;
+        }
+
+        .section-head {
+            margin-bottom: 10px;
+            page-break-after: avoid;
+        }
+
+        .section-pill {
+            display: inline-block;
+            min-width: 150px;
+            padding: 7px 20px 7px 12px;
+            background: #474156;
+            border-radius: 22px;
+            color: #ffffff;
+            font-size: 16px;
+            line-height: 1.2;
+            font-weight: 700;
+        }
+
+        .section-icon {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            margin-right: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            border-radius: 14px;
+            text-align: center;
+            line-height: 24px;
+            font-size: 12px;
+            vertical-align: middle;
+        }
+
+        .section-label {
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .entry {
+            margin-bottom: 12px;
+            page-break-inside: avoid;
+        }
+
+        .entry-head {
+            overflow: hidden;
+            margin-bottom: 4px;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #3a3646;
+            font-weight: 700;
+        }
+
+        .entry-date {
+            float: left;
+            width: 118px;
+        }
+
+        .entry-main {
+            float: left;
+            width: 164px;
+        }
+
+        .entry-side {
+            float: right;
+            width: 200px;
+            text-align: right;
+        }
+
+        .entry-text {
+            font-size: 11px;
+            line-height: 1.7;
+            color: #4f4a5d;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            line-break: loose;
+            white-space: pre-line;
+        }
+
+        .plain-text {
+            font-size: 11px;
+            line-height: 1.8;
+            color: #4f4a5d;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            line-break: loose;
+            white-space: pre-line;
+        }
+
+        .split-column {
+            overflow: hidden;
+        }
+
+        .half {
+            float: left;
+            width: 246px;
+        }
+
+        .half-right {
+            float: right;
+            width: 246px;
+        }
+
+        .clear {
+            clear: both;
+        }
+    </style>
+</head>
+
+<body th:with="primaryEdu=${not #lists.isEmpty(resume.eduExperience) ? resume.eduExperience[0] : null}">
+    <div class="resume-page">
+        <div class="header">
+            <div class="avatar-wrap">
+                <div class="avatar"
+                    th:style="${avatarUrl != null and avatarUrl != ''} ? 'background-image:url(' + avatarUrl + ');background-repeat:no-repeat;background-position:center;background-size:cover;' : ''">
+                    头像
+                </div>
+            </div>
+
+            <div class="header-info">
+                <div class="info-line">
+                    <span class="info-half">学历：<span
+                            th:text="${primaryEdu != null and primaryEdu.degree != null ? primaryEdu.degree : '未填写'}">硕士</span></span>
+                    <span class="info-half">籍贯：<span
+                            th:if="${resume.base == null || resume.base.isEmpty()}">未填写</span><span
+                            th:each="item : ${resume.base}" th:text="${item}"
+                            style="margin-right:4px;">广东深圳</span></span>
+                </div>
+                <div class="info-line">
+                    <span class="info-half">电话：<span
+                            th:text="${resume.tele != null ? resume.tele : '未填写'}">13800138000</span></span>
+                    <span class="info-half">QQ：<span>未填写</span></span>
+                </div>
+                <div class="info-line">
+                    <span class="info-half">邮箱：<span
+                            th:text="${resume.email != null ? resume.email : '未填写'}">test@example.com</span></span>
+                    <span class="info-half">微信：<span
+                            th:text="${resume.vxNo != null ? resume.vxNo : '未填写'}">wechat</span></span>
+                </div>
+            </div>
+
+            <div class="header-name">
+                <div class="name"
+                    th:text="${resume.brief != null and resume.brief.userName != null ? resume.brief.userName : '未填写'}">
+                    昵称</div>
+                <div class="minor">年龄：--</div>
+                <div class="minor">求职意向 | --</div>
+            </div>
+            <div class="clear"></div>
+        </div>
+
+        <div class="content">
+            <div class="section" th:if="${not #lists.isEmpty(resume.eduExperience)}">
+                <div class="section-head">
+                    <div class="section-pill"><span class="section-icon">教</span><span class="section-label">教育背景</span>
+                    </div>
+                </div>
+                <div class="entry" th:each="edu : ${resume.eduExperience}">
+                    <div class="entry-head">
+                        <div class="entry-date" th:text="${edu.startDate != null ? edu.startDate : '未填写'}">
+                            2016.09-2020.06</div>
+                        <div class="entry-main" th:text="${edu.name != null ? edu.name : '未填写学校名称'}">XX大学</div>
+                        <div class="entry-main" style="width:110px;"
+                            th:text="${edu.label != null ? edu.label : '未填写专业'}">会计学</div>
+                        <div class="entry-side" style="width:120px;"
+                            th:text="${edu.degree != null ? edu.degree : '未填写'}">全日制本科</div>
+                    </div>
+                    <div class="entry-text" th:text="${edu.content != null ? edu.content : '未填写项目内容'}">主修课程：相关课程内容。
+                    </div>
+                </div>
+            </div>
+
+            <div class="section" th:if="${not #lists.isEmpty(resume.workExperience)}">
+                <div class="section-head">
+                    <div class="section-pill"><span class="section-icon">工</span><span class="section-label">工作经历</span>
+                    </div>
+                </div>
+                <div class="entry" th:each="work : ${resume.workExperience}">
+                    <div class="entry-head">
+                        <div class="entry-date" th:text="${work.startDate != null ? work.startDate : '未填写'}">2022.03至今
+                        </div>
+                        <div class="entry-side" style="width:360px;"
+                            th:text="${(work.name != null ? work.name : '未填写公司/机构名称') + ' / ' + (work.label != null ? work.label : '未填写职位')}">
+                            XX有限公司 / 主任会计</div>
+                    </div>
+                    <div class="entry-text" th:text="${work.content != null ? work.content : '未填写工作内容'}">负责相关工作内容。</div>
+                </div>
+            </div>
+
+            <div class="section" th:if="${not #lists.isEmpty(resume.projectExperience)}">
+                <div class="section-head">
+                    <div class="section-pill"><span class="section-icon">项</span><span class="section-label">项目经历</span>
+                    </div>
+                </div>
+                <div class="entry" th:each="project : ${resume.projectExperience}">
+                    <div class="entry-head">
+                        <div class="entry-date" th:text="${project.startDate != null ? project.startDate : '未填写'}">
+                            2021.03-2022.02</div>
+                        <div class="entry-side" style="width:360px;"
+                            th:text="${(project.name != null ? project.name : '未填写项目名称') + ' / ' + (project.label != null ? project.label : '项目说明')}">
+                            成本管理项目 / 负责人</div>
+                    </div>
+                    <div class="entry-text" th:text="${project.content != null ? project.content : '未填写项目内容'}">项目内容。
+                    </div>
+                </div>
+            </div>
+
+            <div class="section split-column">
+                <div class="half"
+                    th:if="${resume.brief != null and resume.brief.skills != null and !resume.brief.skills.isEmpty()}">
+                    <div class="section-head">
+                        <div class="section-pill"><span class="section-icon">技</span><span
+                                class="section-label">专业技能</span></div>
+                    </div>
+                    <div class="plain-text" th:text="${resume.brief.skills}">专业技能内容</div>
+                </div>
+
+                <div class="half-right"
+                    th:if="${resume.brief != null and resume.brief.userBrief != null and !resume.brief.userBrief.isEmpty()}">
+                    <div class="section-head">
+                        <div class="section-pill"><span class="section-icon">优</span><span
+                                class="section-label">个人优势</span></div>
+                    </div>
+                    <div class="plain-text" th:text="${resume.brief.userBrief}">个人优势内容</div>
+                </div>
+                <div class="clear"></div>
+            </div>
+
+            <div class="section" th:if="${not #lists.isEmpty(resume.schoolExperience)}">
+                <div class="section-head">
+                    <div class="section-pill"><span class="section-icon">校</span><span class="section-label">在校经历</span>
+                    </div>
+                </div>
+                <div class="entry" th:each="school : ${resume.schoolExperience}">
+                    <div class="entry-head">
+                        <div class="entry-date"
+                            th:text="${(school.startDate != null ? school.startDate : '未填写') + ' - ' + (school.endDate != null ? school.endDate : '至今')}">
+                            2019.12-2020.01</div>
+                        <div class="entry-side" style="width:360px;"
+                            th:text="${(school.name != null ? school.name : '未填写项目名称') + ' / ' + (school.label != null ? school.label : '项目说明')}">
+                            学生会 / 宣传部干部</div>
+                    </div>
+                    <div class="entry-text" th:text="${school.content != null ? school.content : '未填写项目内容'}">在校经历内容。
+                    </div>
+                </div>
+            </div>
+
+            <div class="section" th:if="${resume.extraInfo != null}">
+                <div class="section-head">
+                    <div class="section-pill"><span class="section-icon">奖</span><span class="section-label">获奖情况</span>
+                    </div>
+                </div>
+                <div class="plain-text" th:text="${resume.extraInfo}">附加信息内容</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

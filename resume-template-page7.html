@@ -46,9 +46,12 @@
             overflow: hidden;
         }
 
-        .profile-card {
+        .profile-column {
             float: left;
             width: 142px;
+        }
+
+        .profile-card {
             background: #0d3f75;
             color: #ffffff;
             text-align: center;
@@ -233,14 +236,17 @@
 <body th:with="primaryEdu=${not #lists.isEmpty(resume.eduExperience) ? resume.eduExperience[0] : null}">
 <div class="page">
     <div class="top-wrap">
-        <div class="profile-card">
-            <div class="profile-avatar"
-                 th:style="${avatarUrl != null and avatarUrl != ''} ? 'background-image:url(' + avatarUrl + ');background-repeat:no-repeat;background-position:center;background-size:cover;' : ''">
-                头像
+        <div class="profile-column">
+            <div class="profile-card">
+                <div class="profile-avatar"
+                     th:style="${avatarUrl != null and avatarUrl != ''} ? 'background-image:url(' + avatarUrl + ');background-repeat:no-repeat;background-position:center;background-size:cover;' : ''">
+                    头像
+                </div>
+                <div class="profile-name" th:text="${resume.brief != null and resume.brief.userName != null ? resume.brief.userName : '未填写'}">即小时</div>
+                <div class="profile-meta">年龄：--</div>
+                <div class="profile-meta">求职意向 | --</div>
             </div>
-            <div class="profile-name" th:text="${resume.brief != null and resume.brief.userName != null ? resume.brief.userName : '未填写'}">即小时</div>
-            <div class="profile-meta">年龄：--</div>
-            <div class="profile-meta">求职意向 | --</div>
+            <div class="profile-tail"></div>
         </div>
         <div class="top-main">
             <div class="quote-bar">“人生只有一次，不妨勇敢一点，不会算学，不敢就拼，不能就熟。”</div>
@@ -259,7 +265,6 @@
                 </div>
             </div>
         </div>
-        <div class="profile-tail"></div>
         <div class="clear"></div>
     </div>
 
